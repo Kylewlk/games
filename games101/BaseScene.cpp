@@ -72,10 +72,13 @@ void BaseScene::drawProperty()
         if (ImGui::Button("Save"))
         {
             const auto& pixels = this->fbResolved->readPixel();
-            stbi_write_png(".data/picture-scene.png", width, height, 4, pixels.data(), width * 4);
+            std::string path = ".data/";
+            path += this->getName();
+            path += ".png";
+            stbi_write_png(path.c_str(), width, height, 4, pixels.data(), width * 4);
 
             auto workingDir = std::filesystem::current_path().u8string();
-            LOGI("Save to picture: {}/{}", (const char*)workingDir.data(), ".data/picture-scene.png");
+            LOGI("Save to picture: {}/{}", (const char*)workingDir.data(), path);
         }
         ImGui::Separator();
         this->drawSettings();
