@@ -6,12 +6,14 @@
 
 #include "scene/PictureScene.hpp"
 #include "1_Transform/TransformScene.h"
+#include "2_Rasterize/RasterizerScene.h"
 
 #define ADD_SCENE_MENU(scene) {scene::ID, &scene::create}
 
 AppMenu mainMenus[]{
     ADD_SCENE_MENU(PictureScene),
     ADD_SCENE_MENU(TransformScene),
+    ADD_SCENE_MENU(RasterizerScene),
 };
 
 int mainMenuCount = sizeof(mainMenus)/(sizeof (mainMenus[0]));
