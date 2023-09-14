@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(target_name framework)
+set(target_name games)
 project(${target_name})
 
 set(CMAKE_CXX_STANDARD 20)
