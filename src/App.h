@@ -43,8 +43,8 @@ protected:
     virtual void showDockSpace();
     virtual void setupMouseEvent();
 
-    int winWidth = 1350;
-    int winHeight = 700;
+    int winWidth = 1500;
+    int winHeight = 800;
 
     ImFont* defaultFont{};
 

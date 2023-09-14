@@ -11,21 +11,8 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-#include "scene/PictureScene.hpp"
-#include "scene/ModelScene.h"
-
-#define ADD_SCENE_MENU(scene) {scene::ID, &scene::create}
-
-AppMenu mainMenus[]{
-    ADD_SCENE_MENU(PictureScene),
-    ADD_SCENE_MENU(ModelScene),
-};
-int mainMenuCount = sizeof(mainMenus)/(sizeof (mainMenus[0]));
-
-#undef ADD_SCENE_MENU
-
-//extern AppMenu mainMenus[];
-//extern int mainMenuCount;
+extern AppMenu mainMenus[];
+extern int mainMenuCount;
 
 void App::run()
 {
