@@ -36,6 +36,9 @@ public:
     [[nodiscard]] float getFarPanel() const { return this->farPlane; }
     [[nodiscard]] float getNearPanel() const { return this->nearPlane; }
 
+    [[nodiscard]] math::Vec2 screenToWorld(const math::Vec2& point) const;
+    [[nodiscard]] math::Vec2 worldToScreen(const math::Vec3& point) const;
+
     float updateSpeed{1.0f};
 
 protected:

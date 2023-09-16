@@ -76,6 +76,24 @@ void Camera::setViewUp(const Vec3& u)
     }
 }
 
+math::Vec2 Camera::screenToWorld(const math::Vec2& point) const
+{
+    float x = (point.x / viewWidth) * 2.0f - 1.0f;
+    float y = (point.y / viewHeight) * 2.0f - 1.0f;
+    auto mat = glm::inverse(this->viewProj);
+
+    auto world = mat * math::Vec4{x, y, 0.0f, 1.0f};
+    return {world.x, world.y};
+}
+
+math::Vec2 Camera::worldToScreen(const math::Vec3& point) const
+{
+    auto clip = this->viewProj * math::Vec4{point, 1.0f};
+    float x = ((clip.x / clip.w) + 1.0f) * 0.5f * viewWidth;
+    float y = ((clip.y / clip.w) + 1.0f) * 0.5f * viewHeight;
+    return {x, y};
+}
+
 
 void Camera::move(const math::Vec3& step)
 {

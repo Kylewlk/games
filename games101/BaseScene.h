@@ -30,7 +30,6 @@ protected:
     math::Vec4 color{1.0f, 1.0f, 1.0f, 1.0f};
     float rotation = 0.0f;
 
-    math::Vec2 lastMousePos{};
     bool holdLeftButton{false};
 };
 

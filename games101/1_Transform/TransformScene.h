@@ -20,7 +20,6 @@ public:
     TransformScene(const TransformScene&) = delete;
     TransformScene& operator=(const TransformScene&) = delete;
 
-
 private:
 
     math::Mat4 get_view_matrix(const math::Vec3& eye_pos);
