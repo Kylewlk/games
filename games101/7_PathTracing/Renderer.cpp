@@ -60,22 +60,18 @@ void Renderer::Render(const Scene& scene)
     fclose(fp);    
 }
 
-void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, std::atomic_bool& isContinue,
-                      std::atomic_int& renderedLine)
+void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, RenderTask& task)
 {
-    renderedLine = 0;
-    framebuffer.clear();
-    framebuffer.resize(scene.width * scene.height);
-
     float scale = tan(deg2rad(scene.fov * 0.5));
     float imageAspectRatio = scene.width / (float)scene.height;
     Vector3f eye_pos(278, 273, -800);
-    int m = 0;
+    int m = task.startLine * scene.width;
 
     // change the spp value to change sample ammount
     int spp = 16;
+    int endLine = task.startLine + task.lineCount;
     std::cout << "SPP: " << spp << "\n";
-    for (uint32_t j = 0; j < scene.height && isContinue; ++j) {
+    for (uint32_t j = task.startLine; j < endLine && task.isRendering; ++j) {
         for (uint32_t i = 0; i < scene.width; ++i) {
             // generate primary ray direction
             float x = (2 * (i + 0.5) / (float)scene.width - 1) *
@@ -88,10 +84,8 @@ void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, st
             }
             m++;
         }
-        ++renderedLine;
-        UpdateProgress(j / (float)scene.height);
     }
-    UpdateProgress(1.f);
+    task.isRendering = false;
 }
 
 }

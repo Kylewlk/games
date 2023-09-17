@@ -6,12 +6,11 @@
 #include "Renderer.hpp"
 #include "camera/Camera2D.h"
 #include "BaseScene.h"
+#include <future>
+#include <atomic>
 
 namespace Game101_HW7
 {
-
-class PathTracingScene;
-using PathTracingSceneRef = std::shared_ptr<PathTracingScene>;
 
 class MeshTriangle;
 class Material;
@@ -29,8 +28,10 @@ public:
 
 private:
 
-    const int BufferWidth = 784;
-    const int BufferHeight = 784;
+    static constexpr int BufferWidth = 784;
+    static constexpr int BufferHeight = 784;
+    static constexpr int maxTaskCount = 16;
+    static constexpr int taskLineCount = 8;
 
     PathTracingScene();
     bool init();
@@ -56,10 +57,12 @@ private:
     Game101_HW7::Renderer renderer;
     std::vector<Vector3f> frameBuffer;
 
-    std::thread* thread{};
-    std::atomic_bool isRendering{false};
-    std::atomic_int renderLine{0};
-    std::atomic_bool needUpdateTex{false};
+    int renderLine{0};
+    bool isRendering{false};
+    bool needUpdateTex{false};
+
+    RenderTask task[maxTaskCount];
+    std::future<RenderTask*> results[maxTaskCount];
 };
 
 }

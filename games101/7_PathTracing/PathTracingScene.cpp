@@ -85,58 +85,81 @@ void PathTracingScene::startRender()
         frameBuffer.resize(BufferWidth*BufferHeight, {});
         texture->update(0, 0, BufferWidth, BufferHeight, GL_RGB, GL_FLOAT, frameBuffer.data());
 
-        if (this->thread != nullptr)
+        renderLine = 0;
+        isRendering = true;
+        needUpdateTex = false;
+        for (int i = 0; i < maxTaskCount; ++i)
         {
-            if (this->thread->joinable())
-            {
-                this->thread->join();
-            }
-            delete this->thread;
-            this->thread = nullptr;
+            task[i].startLine = renderLine;
+            task[i].lineCount = taskLineCount;
+            task[i].isRendering = true;
+            results[i] = std::async([this, i](){
+                this->renderer.Render(scene, frameBuffer, this->task[i]);
+                return &this->task[i];
+            });
+
+            renderLine += taskLineCount;
         }
-
-        this->thread = new std::thread([this](){
-
-            this->isRendering = true;
-            auto start = std::chrono::system_clock::now();
-            this->renderer.Render(scene, frameBuffer, isRendering, renderLine);
-            auto stop = std::chrono::system_clock::now();
-            if (this->isRendering)
-            {
-                this->isRendering = false;
-                this->needUpdateTex = true;
-                std::cout << "Render complete: \n";
-            }
-            std::cout << "Time taken: "  << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() / 1000.0f << " seconds\n";
-        });
     }
 }
 
 void PathTracingScene::stopRender()
 {
-    if (this->thread != nullptr)
+    for (int i = 0; i < maxTaskCount; ++i)
     {
-        this->isRendering = false;
-        if (this->thread->joinable())
+        task[i].isRendering = false;
+        if (results[i].valid())
         {
-            this->thread->join();
+            results[i].wait();
         }
-        delete this->thread;
-        this->thread = nullptr;
     }
 }
 
 void PathTracingScene::draw()
 {
-    if (this->isRendering && !frameBuffer.empty())
+    if (this->isRendering)
     {
-        texture->update(0, 0, BufferWidth, this->renderLine, GL_RGB, GL_FLOAT, frameBuffer.data());
+        bool allTaskFinish = true;
+        for (auto& result : results)
+        {
+            if (result.valid())
+            {
+                auto status = result.wait_for(std::chrono::microseconds(0));
+                if (status == std::future_status::ready)
+                {
+                    auto t = result.get();
+                    texture->update(0, t->startLine, BufferWidth, t->lineCount, GL_RGB, GL_FLOAT,
+                                    frameBuffer.data() + (t->startLine * BufferWidth));
+                    if (this->renderLine < BufferHeight)
+                    {
+                        t->startLine = renderLine;
+                        t->lineCount = std::min(BufferHeight - renderLine, taskLineCount);
+                        t->isRendering = true;
+                        result = std::async([this, t](){
+                            this->renderer.Render(scene, frameBuffer, *t);
+                            return t;
+                        });
+                        this->renderLine += t->lineCount;
+
+                        allTaskFinish = false;
+                    }
+                }
+                else
+                {
+                    allTaskFinish = false;
+                }
+            }
+        }
+        if (allTaskFinish)
+        {
+            this->isRendering = false;
+        }
     }
-    else if (this->needUpdateTex)
-    {
-        texture->update(0, 0, BufferWidth, BufferHeight, GL_RGB, GL_FLOAT, frameBuffer.data());
-        this->needUpdateTex = false;
-    }
+//    else if (this->needUpdateTex)
+//    {
+//        texture->update(0, 0, BufferWidth, BufferHeight, GL_RGB, GL_FLOAT, frameBuffer.data());
+//        this->needUpdateTex = false;
+//    }
 
     BaseScene::draw();
 }
