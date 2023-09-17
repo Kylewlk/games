@@ -133,6 +133,19 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
     }
 
     return {};
+
+//    Intersection isect;
+//    // TODO Traverse the BVH to find intersection
+//    if(!node->bounds.IntersectP(ray, ray.direction_inv, std::array<int, 3> {ray.direction.x>0, ray.direction.y>0, ray.direction.z>0}))
+//        return isect;
+//    if(node->object != nullptr)
+//        return node->object->getIntersection(ray);
+//
+//    Intersection isect_left, isect_right;
+//    isect_left = getIntersection(node->left, ray);
+//    isect_right = getIntersection(node->right, ray);
+//
+//    return isect_left.distance <= isect_right.distance ? isect_left : isect_right;
 }
 
 

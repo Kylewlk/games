@@ -82,6 +82,9 @@ void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, Re
             for (int k = 0; k < spp && task.isRendering; k++){
                 framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;
             }
+            framebuffer[m].x = std::pow(framebuffer[m].x, 1.0f/2.2f);
+            framebuffer[m].y = std::pow(framebuffer[m].y, 1.0f/2.2f);
+            framebuffer[m].z = std::pow(framebuffer[m].z, 1.0f/2.2f);
             m++;
         }
     }

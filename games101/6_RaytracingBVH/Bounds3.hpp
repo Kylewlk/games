@@ -107,35 +107,29 @@ inline bool Bounds3::IntersectP(const Ray& ray) const
 
     for (int i = 0; i < 3; ++i)
     {
-        if (std::abs(ray.direction[i]) < EPSILON)
+        if (abs(ray.direction[i]) < EPSILON)
         {
-            if (ray.origin[i] < pMin[i] || ray.origin[i] > pMax[i])
-            {
-                return false;
-            }
+            continue;
         }
-        else
-        {
-            auto invDir = 1.0f/ray.direction[i];
-            auto t1 = (pMin[i] - ray.origin[i]) * invDir;
-            auto t2 = (pMax[i] - ray.origin[i]) * invDir;
-            if (t1 > t2)
-            {
-                std::swap(t1, t2);
-            }
 
-            if (t1 > enter)
-            {
-                enter = (float)t1;
-            }
-            if (t2 < exit)
-            {
-                exit = (float)t2;
-            }
+        auto t1 = (pMin[i] - ray.origin[i]) * ray.direction_inv[i];
+        auto t2 = (pMax[i] - ray.origin[i]) * ray.direction_inv[i];
+        if (t1 > t2)
+        {
+            std::swap(t1, t2);
+        }
+
+        if (t1 > enter)
+        {
+            enter = (float)t1;
+        }
+        if (t2 < exit)
+        {
+            exit = (float)t2;
         }
     }
 
-    return enter - exit < EPSILON;
+    return enter - exit < EPSILON && exit >= 0;
 }
 
 inline Bounds3 Union(const Bounds3& b1, const Bounds3& b2)
