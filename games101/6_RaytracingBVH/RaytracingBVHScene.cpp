@@ -1,71 +1,46 @@
 //
 // Created by Yun on 2022/10/1.
 //
-#include "RayIntersectionScene.h"
+#include "RaytracingBVHScene.h"
 #include "common/Texture.h"
-#include "Sphere.hpp"
 #include "Triangle.hpp"
-#include "Light.hpp"
 
-namespace Game101_HW5
+namespace Game101_HW6
 {
 
-
-RayIntersectionScene::RayIntersectionScene()
+RaytracingBVHScene::RaytracingBVHScene()
     :BaseScene(ID, 0, 0), scene(BufferWidth, BufferHeight)
 {
     this->init();
-    RayIntersectionScene::reset();
 }
 
-RayIntersectionScene::~RayIntersectionScene()
+RaytracingBVHScene::~RaytracingBVHScene()
 {
     stopRender();
+    delete bunny;
 }
 
-SceneRef RayIntersectionScene::create()
+SceneRef RaytracingBVHScene::create()
 {
-    struct enable_make_shared : public RayIntersectionScene
+    struct enable_make_shared : public RaytracingBVHScene
     {
         enable_make_shared() = default;
     };
     return std::make_shared<enable_make_shared>();
 }
 
-bool RayIntersectionScene::init()
+bool RaytracingBVHScene::init()
 {
 //    Scene scene(1280, 960);
 
-//    auto sph1 = std::make_unique<Sphere>(Vector3f(-1, 0, -12), 2.0f);
-//    sph1->ior = 2.8;
-//    sph1->materialType = REFLECTION;
-//    sph1->diffuseColor = Vector3f(0.6, 0.7, 0.8);
-//
-//    auto sph2 = std::make_unique<Sphere>(Vector3f(2.5, -0.5, -8), 1.5f);
-//    sph2->ior = 1.5;
-//    sph2->diffuseColor = Vector3f(0.9, 0.0, 0.1);
-//    sph2->materialType = REFLECTION_AND_REFRACTION;
+//    MeshTriangle bunny("src/games/101graphic/models/bunny/bunny.obj");
+//    scene.Add(&bunny);
+    bunny = new MeshTriangle("asset/model/bunny/bunny.obj");
+    scene.Add(bunny);
 
-    auto sph1 = std::make_unique<Sphere>(Vector3f(-1, 0, -12), 2.0f);
-    sph1->materialType = DIFFUSE_AND_GLOSSY;
-    sph1->diffuseColor = Vector3f(0.6, 0.7, 0.8);
-
-    auto sph2 = std::make_unique<Sphere>(Vector3f(0.5, -0.5, -8), 1.5f);
-    sph2->ior = 1.5;
-    sph2->materialType = REFLECTION_AND_REFRACTION;
-
-    scene.Add(std::move(sph1));
-    scene.Add(std::move(sph2));
-
-    Vector3f verts[4] = {{-5,-3,-6}, {5,-3,-6}, {5,-3,-16}, {-5,-3,-16}};
-    uint32_t vertIndex[6] = {0, 1, 3, 1, 2, 3};
-    Vector2f st[4] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
-    auto mesh = std::make_unique<MeshTriangle>(verts, vertIndex, 2, st);
-    mesh->materialType = DIFFUSE_AND_GLOSSY;
-
-    scene.Add(std::move(mesh));
-    scene.Add(std::make_unique<Light>(Vector3f(-20, 70, 20), 0.5f));
-    scene.Add(std::make_unique<Light>(Vector3f(30, 50, -12), 0.5f));
+    scene.Add(std::make_unique<Light>(Vector3f(-20, 70, 20), 1.0f));
+    scene.Add(std::make_unique<Light>(Vector3f(20, 70, 20), 1.0f));
+    scene.buildBVH();
 
     this->texture = Texture::create(GL_RGB32F, BufferWidth, BufferHeight);
 
@@ -74,12 +49,7 @@ bool RayIntersectionScene::init()
     return true;
 }
 
-void RayIntersectionScene::reset()
-{
-    BaseScene::reset();
-}
-
-void RayIntersectionScene::startRender()
+void RaytracingBVHScene::startRender()
 {
     if (!this->isRendering)
     {
@@ -98,8 +68,8 @@ void RayIntersectionScene::startRender()
         }
 
         this->thread = new std::thread([this](){
-            this->isRendering = true;
 
+            this->isRendering = true;
             auto start = std::chrono::system_clock::now();
             this->renderer.Render(scene, frameBuffer, isRendering, renderLine);
             auto stop = std::chrono::system_clock::now();
@@ -114,7 +84,7 @@ void RayIntersectionScene::startRender()
     }
 }
 
-void RayIntersectionScene::stopRender()
+void RaytracingBVHScene::stopRender()
 {
     if (this->thread != nullptr)
     {
@@ -128,7 +98,7 @@ void RayIntersectionScene::stopRender()
     }
 }
 
-void RayIntersectionScene::draw()
+void RaytracingBVHScene::draw()
 {
     if (this->isRendering && !frameBuffer.empty())
     {
@@ -143,9 +113,8 @@ void RayIntersectionScene::draw()
     BaseScene::draw();
 }
 
-void RayIntersectionScene::drawSettings()
+void RaytracingBVHScene::drawSettings()
 {
-
     if (ImGui::Button("Stop"))
     {
         this->stopRender();
@@ -155,7 +124,6 @@ void RayIntersectionScene::drawSettings()
     {
         this->startRender();
     }
-
 }
 
 }
