@@ -110,9 +110,10 @@ void GeometryScene::onMouseEvent(const MouseEvent* e)
         {
             this->activeIndex = -1;
             auto pos = this->camera->screenToWorld(e->point);
+            auto dist = 10 * this->camera->getViewScale();
             for (int i = 0; i < 4; ++i)
             {
-                if (glm::distance(pos, points[i]) < 10)
+                if (glm::distance(pos, points[i]) < dist)
                 {
                     this->activeIndex = i;
                 }

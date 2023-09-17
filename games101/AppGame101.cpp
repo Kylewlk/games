@@ -9,6 +9,7 @@
 #include "2_Rasterize/RasterizerScene.h"
 #include "3_Shading/ShadingScene.h"
 #include "4_Geometry/GeometryScene.h"
+#include "5_RayIntersection/RayIntersectionScene.h"
 
 #define ADD_SCENE_MENU(scene) {scene::ID, &scene::create}
 
@@ -18,6 +19,7 @@ AppMenu mainMenus[]{
     ADD_SCENE_MENU(RasterizerScene),
     ADD_SCENE_MENU(Game101_HW3::ShadingScene),
     ADD_SCENE_MENU(Game101_HW4::GeometryScene),
+    ADD_SCENE_MENU(Game101_HW5::RayIntersectionScene),
 };
 
 int mainMenuCount = sizeof(mainMenus)/(sizeof (mainMenus[0]));
