@@ -4,6 +4,7 @@
 #include "PathTracingScene.h"
 #include "common/Texture.h"
 #include "Triangle.hpp"
+#include <imgui/imgui_internal.h>
 
 namespace Game101_HW7
 {
@@ -87,9 +88,13 @@ void PathTracingScene::startRender()
 
         renderLine = 0;
         isRendering = true;
+        currentSPP = spp;
+        process = 0.0f;
+        this->startRenderTime = std::chrono::steady_clock::now();
 
         for (int i = 0; i < maxTaskCount; ++i)
         {
+            tasks[i].spp = this->spp;
             tasks[i].startLine = renderLine;
             tasks[i].lineCount = taskLineCount;
             tasks[i].isRendering = true;
@@ -147,6 +152,7 @@ void PathTracingScene::draw()
 
                         allTaskFinish = false;
                     }
+                    this->process += float(t->lineCount) / float(BufferHeight);
                 }
                 else
                 {
@@ -156,7 +162,10 @@ void PathTracingScene::draw()
         }
         if (allTaskFinish)
         {
+            this->process = 1.0;
             this->isRendering = false;
+            auto finishTime = std::chrono::steady_clock::now();
+            std::cout << "Render complete," << "Time taken: "  << (float)std::chrono::duration_cast<std::chrono::milliseconds>(finishTime - startRenderTime).count() / 1000.0f << " seconds\n";
         }
     }
 
@@ -165,15 +174,40 @@ void PathTracingScene::draw()
 
 void PathTracingScene::drawSettings()
 {
-    if (ImGui::Button("Stop"))
+    ImGui::Text("Current Render SPP: %d", this->spp);
+    if ( this->isRendering)
     {
-        this->stopRender();
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
     }
 
-    if (ImGui::Button("Restart"))
+    ImGui::SliderInt("SPP(Sample Per Point)", &spp, 1, 256);
+
+    if ( this->isRendering)
     {
-        this->startRender();
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
     }
+
+    if (isRendering)
+    {
+        if (ImGui::Button("Stop"))
+        {
+            this->stopRender();
+        }
+        ImGui::ProgressBar(process);
+        auto finishTime = std::chrono::steady_clock::now();
+        auto time = (float)std::chrono::duration_cast<std::chrono::milliseconds>(finishTime - startRenderTime).count() / 1000.0f;
+        ImGui::Text("Time: %.2fs", time);
+    }
+    else
+    {
+        if (ImGui::Button("Restart"))
+        {
+            this->startRender();
+        }
+    }
+
 }
 
 }

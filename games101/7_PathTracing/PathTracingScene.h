@@ -8,6 +8,7 @@
 #include "BaseScene.h"
 #include <future>
 #include <atomic>
+#include <chrono>
 
 namespace Game101_HW7
 {
@@ -56,6 +57,11 @@ private:
     Game101_HW7::Scene scene;
     Game101_HW7::Renderer renderer;
     std::vector<Vector3f> frameBuffer;
+
+    int spp{16};
+    int currentSPP{0};
+    float process{0.0f};
+    std::chrono::steady_clock::time_point startRenderTime;
 
     int renderLine{0};
     bool isRendering{false};

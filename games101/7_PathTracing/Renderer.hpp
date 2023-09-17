@@ -10,6 +10,7 @@ namespace Game101_HW7
 
 struct RenderTask
 {
+    int spp{4};
     int startLine{0};
     int lineCount{0};
     std::atomic_bool isRendering{false};

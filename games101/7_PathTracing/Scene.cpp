@@ -62,120 +62,70 @@ bool Scene::trace(
 }
 
 // Implementation of Path Tracing
-Vector3f Scene::castRay2(const Ray &ray, int depth) const
+Vector3f Scene::castRay(const Ray &ray, int depth) const
 {
-    // TO DO Implement Path Tracing Algorithm here
-    if (depth > this->maxDepth) {
-        return {0.0,0.0,0.0};
+    if (depth > 50)
+    {
+        return {0.0f, 0.0f, 0.0f};
     }
 
-    Intersection intersection = this->intersect(ray);
+    // TO DO Implement Path Tracing Algorithm here
+    Intersection intersection = Scene::intersect(ray);
     if (!intersection.happened)
     {
         return this->backgroundColor;
     }
 
+    // std::cout<<1<<std::endl;
+    Vector3f hitPoint = intersection.coords;
+    Vector3f N = intersection.normal; // normal
     Material *m = intersection.m;
-    Object *hitObject = intersection.obj;
+    // if(m->hasEmission())
+    //     std::cout<<1<<std::endl;
 
-    if (m->hasEmission())
-    {
-        return m->getEmission();
+    // init L_dir and L_indir
+    Vector3f L_dir(0.0), L_indir(0.0);
+
+    // Uniformly sample the light at x (pdf_light = 1 / A)
+    Intersection intersection_light;
+    float pdf_light;
+    sampleLight(intersection_light, pdf_light);
+    // std::cout<<intersection_light.coords.x<<" "<<intersection_light.coords.y<<" "<<intersection_light.coords.z<<std::endl;
+
+    // Shoot a ray from p to x
+    Vector3f dir_p_x = (intersection_light.coords - hitPoint).normalized();
+    Ray ray_p_x(hitPoint + EPSILON * N, dir_p_x);
+    Intersection intersection_p_x = Scene::intersect(ray_p_x);
+
+    // If the ray is not blocked in the middle
+    if(intersection_p_x.happened && intersection_p_x.m->hasEmission()) {
+        Vector3f NN = intersection_p_x.normal;
+        L_dir = intersection_p_x.m->m_emission // 光源radiance
+                * m->eval(ray.direction, dir_p_x, N) // BRDF
+                * dotProduct(dir_p_x, N) // 表面 costθ, (Theta)
+                * dotProduct(-dir_p_x, NN) // 光源方向 costθ, (Theta)
+                / (float)intersection_p_x.distance // 光源衰减 distance 记录了距离的平方， 参考：Triangle::getIntersection
+                / pdf_light;
     }
 
-    Vector3f L_dir{0.0f, 0.0f, 0.0f};
-    Vector3f L_indir{0.0f, 0.0f, 0.0f};
+    // Test Russian Roulette with probability RussianRoulette
+    if(get_random_float() <= RussianRoulette) {
+        // Trace a ray r(p, wi)
+        Vector3f dir_i = m->sample(ray.direction, N).normalized();
+        Ray ray_p_diri(hitPoint, dir_i);
+        Intersection intersection_p_diri = Scene::intersect(ray_p_diri);
 
-    Intersection lightIntersect;
-    float lightPdf{};
-    sampleLight(lightIntersect, lightPdf);
-    auto lightVector = lightIntersect.coords - intersection.coords;
-    auto lightDir = lightVector.normalized();
-    Ray obj2LightRay{intersection.coords, lightDir};
-    auto middleLight = this->intersect(obj2LightRay);
-    if (middleLight.obj == lightIntersect.obj)
-    {
-        auto f_r = m->eval(ray.direction, lightDir, intersection.normal);
-        auto dis = std::sqrt(dotProduct(lightVector, lightVector));
-        L_dir = lightIntersect.emit * f_r * dotProduct(lightDir, intersection.normal)
-                * dotProduct(-lightDir, lightIntersect.normal) / dis / lightPdf;
-    }
-
-    if (get_random_float() > RussianRoulette)
-    {
-        return L_dir;
-    }
-
-    auto wo = m->sample(ray.direction, intersection.normal).normalized();
-    Ray obj2ObjRay{intersection.coords, wo};
-    Intersection intersection2 = this->intersect(ray);
-    if (intersection2.happened && !intersection2.m->hasEmission())
-    {
-        float pdf = intersection.m->pdf(ray.direction, wo, intersection.normal);
-        auto f_r = intersection.m->eval(ray.direction, wo, intersection.normal);
-        L_indir = castRay(obj2ObjRay, depth + 1) * f_r * dotProduct(wo, intersection.normal) / pdf / RussianRoulette;
-    }
-
-    return L_dir + L_indir;
-}
-
-
-// Implementation of Path Tracing
-Vector3f Scene::castRay(const Ray &ray, int depth) const
-{
-    // TO DO Implement Path Tracing Algorithm here
-    Intersection intersection = Scene::intersect(ray);
-    if(intersection.happened) {
-        // std::cout<<1<<std::endl;
-        Vector3f hitPoint = intersection.coords;
-        Vector3f N = intersection.normal; // normal
-        Material *m = intersection.m;
-        // if(m->hasEmission())
-        //     std::cout<<1<<std::endl;
-
-        // init L_dir and L_indir
-        Vector3f L_dir(0.0), L_indir(0.0);
-
-        // Uniformly sample the light at x (pdf_light = 1 / A)
-        Intersection intersection_light;
-        float pdf_light;
-        sampleLight(intersection_light, pdf_light);
-        // std::cout<<intersection_light.coords.x<<" "<<intersection_light.coords.y<<" "<<intersection_light.coords.z<<std::endl;
-
-        // Shoot a ray from p to x
-        Vector3f dir_p_x = (intersection_light.coords - hitPoint).normalized();
-        Ray ray_p_x(hitPoint + EPSILON * N, dir_p_x);
-        // std::cout<<hitPoint.x<<" "<<hitPoint.y<<" "<<hitPoint.z<<std::endl;
-        // std::cout<<dir_p_x.x<<" "<<dir_p_x.y<<" "<<dir_p_x.z<<std::endl;
-        Intersection intersection_p_x = Scene::intersect(ray_p_x);
-        // if(intersection_p_x.happened)
-        // std::cout<<pdf_light<<" "<<intersection_p_x.distance<<std::endl;
-
-        // If the ray is not blocked in the middle
-        if(intersection_p_x.happened && intersection_p_x.m->hasEmission()) {
-            // std::cout<<1<<std::endl;
-            Vector3f NN = intersection_p_x.normal;
-            L_dir = intersection_p_x.m->m_emission * m->eval(ray.direction, dir_p_x, N) * dotProduct(dir_p_x, N) * dotProduct(-dir_p_x, NN) / intersection_p_x.distance / pdf_light;
+        // If ray r hit a non-emitting object at q
+        if(intersection_p_diri.happened && !intersection_p_diri.m->hasEmission()) {
+            L_indir = castRay(ray_p_diri, depth+1) // 间接光 radiance
+                      * m->eval(ray.direction, dir_i, N) // BRDF
+                      * dotProduct(dir_i, N) // 表面 costθ, (Theta)
+                      / m->pdf(ray.direction, dir_i, N)
+                      / RussianRoulette;
         }
-
-        // Test Russian Roulette with probability RussianRoulette
-        if(get_random_float() <= RussianRoulette) {
-            // Trace a ray r(p, wi)
-            // std::cout<<1<<std::endl;
-            Vector3f dir_i = m->sample(ray.direction, N).normalized();
-            Ray ray_p_diri(hitPoint, dir_i);
-            Intersection intersection_p_diri = Scene::intersect(ray_p_diri);
-
-            // If ray r hit a non-emitting object at q
-            if(intersection_p_diri.happened && !intersection_p_diri.m->hasEmission()) {
-                L_indir = castRay(ray_p_diri, depth+1) * m->eval(ray.direction, dir_i, N) * dotProduct(dir_i, N) / m->pdf(ray.direction, dir_i, N) / RussianRoulette;
-            }
-        }
-
-        return m->getEmission() + L_dir + L_indir;
-    } else {
-        return Vector3f(0,0,0);
     }
+
+    return m->getEmission() + L_dir + L_indir;
 }
 
 

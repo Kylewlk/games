@@ -68,9 +68,8 @@ void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, Re
     int m = task.startLine * scene.width;
 
     // change the spp value to change sample ammount
-    int spp = 16;
+    int spp = task.spp;
     int endLine = task.startLine + task.lineCount;
-    std::cout << "SPP: " << spp << "\n";
     for (uint32_t j = task.startLine; j < endLine; ++j) {
         for (uint32_t i = 0; i < scene.width; ++i) {
             // generate primary ray direction
