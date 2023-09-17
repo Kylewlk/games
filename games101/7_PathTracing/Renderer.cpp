@@ -71,7 +71,7 @@ void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, Re
     int spp = 16;
     int endLine = task.startLine + task.lineCount;
     std::cout << "SPP: " << spp << "\n";
-    for (uint32_t j = task.startLine; j < endLine && task.isRendering; ++j) {
+    for (uint32_t j = task.startLine; j < endLine; ++j) {
         for (uint32_t i = 0; i < scene.width; ++i) {
             // generate primary ray direction
             float x = (2 * (i + 0.5) / (float)scene.width - 1) *
@@ -79,7 +79,7 @@ void Renderer::Render(const Scene& scene, std::vector<Vector3f>& framebuffer, Re
             float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
 
             Vector3f dir = normalize(Vector3f(-x, y, 1));
-            for (int k = 0; k < spp; k++){
+            for (int k = 0; k < spp && task.isRendering; k++){
                 framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;
             }
             m++;

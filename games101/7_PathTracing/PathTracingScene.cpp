@@ -159,11 +159,6 @@ void PathTracingScene::draw()
             this->isRendering = false;
         }
     }
-//    else if (this->needUpdateTex)
-//    {
-//        texture->update(0, 0, BufferWidth, BufferHeight, GL_RGB, GL_FLOAT, frameBuffer.data());
-//        this->needUpdateTex = false;
-//    }
 
     BaseScene::draw();
 }
