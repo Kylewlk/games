@@ -31,7 +31,7 @@ private:
     static constexpr int BufferWidth = 784;
     static constexpr int BufferHeight = 784;
     static constexpr int maxTaskCount = 16;
-    static constexpr int taskLineCount = 8;
+    static constexpr int taskLineCount = 16;
 
     PathTracingScene();
     bool init();
@@ -59,9 +59,8 @@ private:
 
     int renderLine{0};
     bool isRendering{false};
-    bool needUpdateTex{false};
 
-    RenderTask task[maxTaskCount];
+    RenderTask tasks[maxTaskCount];
     std::future<RenderTask*> results[maxTaskCount];
 };
 

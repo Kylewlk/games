@@ -87,15 +87,15 @@ void PathTracingScene::startRender()
 
         renderLine = 0;
         isRendering = true;
-        needUpdateTex = false;
+
         for (int i = 0; i < maxTaskCount; ++i)
         {
-            task[i].startLine = renderLine;
-            task[i].lineCount = taskLineCount;
-            task[i].isRendering = true;
+            tasks[i].startLine = renderLine;
+            tasks[i].lineCount = taskLineCount;
+            tasks[i].isRendering = true;
             results[i] = std::async([this, i](){
-                this->renderer.Render(scene, frameBuffer, this->task[i]);
-                return &this->task[i];
+                this->renderer.Render(scene, frameBuffer, this->tasks[i]);
+                return &this->tasks[i];
             });
 
             renderLine += taskLineCount;
@@ -105,12 +105,16 @@ void PathTracingScene::startRender()
 
 void PathTracingScene::stopRender()
 {
-    for (int i = 0; i < maxTaskCount; ++i)
+    this->isRendering = false;
+    for (auto & t : tasks)
     {
-        task[i].isRendering = false;
-        if (results[i].valid())
+        t.isRendering = false;
+    }
+    for (auto& result : results)
+    {
+        if (result.valid())
         {
-            results[i].wait();
+            result.wait();
         }
     }
 }
