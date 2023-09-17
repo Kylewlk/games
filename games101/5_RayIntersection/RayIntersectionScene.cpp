@@ -10,7 +10,6 @@
 namespace Game101_HW5
 {
 
-
 RayIntersectionScene::RayIntersectionScene()
     :BaseScene(ID, 0, 0), scene(BufferWidth, BufferHeight)
 {

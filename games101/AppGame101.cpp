@@ -11,6 +11,7 @@
 #include "4_Geometry/GeometryScene.h"
 #include "5_RayIntersection/RayIntersectionScene.h"
 #include "6_RaytracingBVH/RaytracingBVHScene.h"
+#include "7_PathTracing/PathTracingScene.h"
 
 #define ADD_SCENE_MENU(scene) {scene::ID, &scene::create}
 
@@ -22,6 +23,7 @@ AppMenu mainMenus[]{
     ADD_SCENE_MENU(Game101_HW4::GeometryScene),
     ADD_SCENE_MENU(Game101_HW5::RayIntersectionScene),
     ADD_SCENE_MENU(Game101_HW6::RaytracingBVHScene),
+    ADD_SCENE_MENU(Game101_HW7::PathTracingScene),
 };
 
 int mainMenuCount = sizeof(mainMenus)/(sizeof (mainMenus[0]));
