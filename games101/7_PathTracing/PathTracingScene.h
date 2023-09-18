@@ -61,6 +61,7 @@ private:
     int spp{16};
     int currentSPP{0};
     float process{0.0f};
+    float renderTime{0.0f};
     std::chrono::steady_clock::time_point startRenderTime;
 
     int renderLine{0};

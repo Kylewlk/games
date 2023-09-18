@@ -104,7 +104,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
                 * m->eval(ray.direction, dir_p_x, N) // BRDF
                 * dotProduct(dir_p_x, N) // 表面 costθ, (Theta)
                 * dotProduct(-dir_p_x, NN) // 光源方向 costθ, (Theta)
-                / (float)intersection_p_x.distance // 光源衰减 distance 记录了距离的平方， 参考：Triangle::getIntersection
+                / (float)(intersection_p_x.distance * intersection_p_x.distance) // 光源衰减
                 / pdf_light;
     }
 

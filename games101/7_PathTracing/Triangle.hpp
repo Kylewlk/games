@@ -259,7 +259,7 @@ inline Intersection Triangle::getIntersection(Ray ray)
     inter.happened = t_tmp > 0.0;
     inter.coords = v0 * float(1.0 - u - v) + v1 * float(u) + v2 * float(v);
     inter.normal = normal;
-    inter.distance = t_tmp*t_tmp; // 距离的平方
+    inter.distance = t_tmp; // dir 是单位向量
     inter.obj = this;
     inter.m = this->m;
 

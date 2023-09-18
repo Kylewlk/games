@@ -160,14 +160,15 @@ void PathTracingScene::draw()
                 }
             }
         }
+        auto now = std::chrono::steady_clock::now();
+        this->renderTime = (float)std::chrono::duration_cast<std::chrono::milliseconds>(now - startRenderTime).count() / 1000.0f;
         if (allTaskFinish)
         {
-            this->process = 1.0;
             this->isRendering = false;
             auto finishTime = std::chrono::steady_clock::now();
-            std::cout << "Render complete," << "Time taken: "  << (float)std::chrono::duration_cast<std::chrono::milliseconds>(finishTime - startRenderTime).count() / 1000.0f << " seconds\n";
+            std::cout << "Render complete," << "Time taken: "  << renderTime << " seconds\n";
         }
-    }
+   }
 
     BaseScene::draw();
 }
@@ -181,7 +182,7 @@ void PathTracingScene::drawSettings()
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
     }
 
-    ImGui::SliderInt("SPP(Sample Per Point)", &spp, 1, 256);
+    ImGui::SliderInt("SPP(Sample Per Pixel)", &spp, 1, 256);
 
     if ( this->isRendering)
     {
@@ -195,10 +196,6 @@ void PathTracingScene::drawSettings()
         {
             this->stopRender();
         }
-        ImGui::ProgressBar(process);
-        auto finishTime = std::chrono::steady_clock::now();
-        auto time = (float)std::chrono::duration_cast<std::chrono::milliseconds>(finishTime - startRenderTime).count() / 1000.0f;
-        ImGui::Text("Time: %.2fs", time);
     }
     else
     {
@@ -207,6 +204,9 @@ void PathTracingScene::drawSettings()
             this->startRender();
         }
     }
+
+    ImGui::ProgressBar(process);
+    ImGui::Text("Time: %.2fs", renderTime);
 
 }
 
