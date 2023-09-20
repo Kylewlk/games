@@ -104,8 +104,9 @@ void Model3DScene::draw()
         shaderLight->setUniform("cameraPosition", camera->getViewPosition());
 
         this->model->draw();
-    }
 
+        drawPoints(&lightPosition, 1, camera->getViewProj(), {lightColor, 1.0}, 5);
+    }
 }
 
 void Model3DScene::drawSettings()

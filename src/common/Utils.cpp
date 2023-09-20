@@ -4,6 +4,7 @@
 
 #include "EventSystem.h"
 #include "Utils.h"
+#include "Shader.h"
 
 #include "MathHelp.h"
 
@@ -102,15 +103,17 @@ void writeToFile(const std::string& filePath, const ByteBuffer& data)
 }
 
 
-namespace DrawQuad
+struct GLData
 {
-    GLuint vao{0}, vbo{0};
+    GLuint vao{0}, vbo{0}, ebo{0};
     CustomEventListenerRef cleanListener;
-}// namespace DrawTexture
+};
 
 void drawQuad()
 {
-    using namespace DrawQuad;
+    static GLData glData;
+    auto&[vao, vbo, ebo, cleanListener] = glData;
+
     if (vao == 0)
     {
         // clang-format off
@@ -133,14 +136,54 @@ void drawQuad()
         CHECK_GL_ERROR();
         cleanListener = CustomEventListener::create(CustomEvent::exitSystemEvent);
         cleanListener->onCustomEvent = [](const CustomEvent* e) {
-            glDeleteVertexArrays(1, &vao);
-            glDeleteBuffers(1, &vbo);
+            glDeleteVertexArrays(1, &glData.vao);
+            glDeleteBuffers(1, &glData.vao);
         };
         EventSystem::get()->subscribe(cleanListener);
     }
 
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void drawPoints(math::Vec3* points, int count, const math::Mat4& mat, const math::Vec4& color, float pointSize)
+{
+    static GLData glData;
+    static ShaderRef shader;
+    auto&[vao, vbo, ebo, cleanListener] = glData;
+
+    if (cleanListener == nullptr)
+    {
+        shader = Shader::createByPath("asset/shader/solid.vert", "asset/shader/solid.frag");
+        cleanListener = CustomEventListener::create(CustomEvent::exitSystemEvent);
+        cleanListener->onCustomEvent = [](const CustomEvent* e) {
+            shader.reset();
+            glDeleteVertexArrays(1, &glData.vao);
+            glDeleteBuffers(1, &glData.vao);
+        };
+        EventSystem::get()->subscribe(cleanListener);
+    }
+
+    if (vao == 0)
+    {
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(math::Vec3) , (void*) nullptr);
+        glEnableVertexAttribArray(0);
+    }
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, (int)sizeof(math::Vec3)*count, points, GL_STATIC_DRAW);
+
+    shader->use();
+    shader->setUniform("mvp", mat);
+    shader->setUniform("color", color);
+
+    glPointSize(pointSize);
+    glDrawArrays(GL_POINTS, 0, count);
 }
 
 namespace json

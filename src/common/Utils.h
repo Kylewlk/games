@@ -52,6 +52,7 @@ void writeToFile(const std::string& filePath, const std::string& str);
 void writeToFile(const std::string& filePath, const ByteBuffer& data);
 
 void drawQuad();
+void drawPoints(math::Vec3* points, int count, const math::Mat4& mat, const math::Vec4& color, float pointSize);
 
 namespace json
 {
