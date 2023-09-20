@@ -15,9 +15,9 @@ Texture::~Texture()
     }
 }
 
-TextureRef Texture::create(const std::string& picPath, bool premultiply /*= true*/)
+TextureRef Texture::create(const std::string& picPath, bool flipY,  bool premultiply)
 {
-    return create(readFile(picPath), false, false, premultiply);
+    return create(readFile(picPath), flipY, false, premultiply);
 }
 
 TextureRef Texture::createWithMipmap(const std::string& picPath, bool flipY, bool premultiply)

@@ -15,7 +15,7 @@ public:
     Texture(const Texture&) = delete;
     Texture& operator=(const Texture&) = delete;
 
-    static TextureRef create(const std::string& picPath, bool premultiply = true);
+    static TextureRef create(const std::string& picPath, bool flipY, bool premultiply);
     static TextureRef createWithMipmap(const std::string& picPath, bool flipY, bool premultiply);
     static TextureRef create(const ByteBuffer& picData, bool flipY, bool genMipmap, bool premultiply);
     static TextureRef createHDR(std::string_view picPath);

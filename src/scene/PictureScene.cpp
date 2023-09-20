@@ -13,7 +13,7 @@
 PictureScene::PictureScene(int width, int height)
     : Scene(ID, width, height)
 {
-    this->texture = Texture::create("asset/Lenna.png");
+    this->texture = Texture::create("asset/Lenna.png", false, true);
     this->shader = Shader::createByPath("asset/shader/picture.vert", "asset/shader/picture.frag");
     this->camera = Camera2D::create();
 }
