@@ -80,8 +80,9 @@ void Model3DScene::draw()
     {
         if(this->lightMove)
         {
-            static auto timer = static_cast<float>(TimeSys::getTime());
+            static auto timer = 0.0f;
             timer += static_cast<float>(TimeSys::getDelta() * 0.2);
+            timer = std::fmod(timer, math::pi_2);
             lightPosition.x = std::sin(timer*6.0f) * 1.5f;
             lightPosition.y = std::sin(timer*4.0f) * 2.0f + 1.0f;
             lightPosition.z = std::sin(timer*2.0f) * 1.5f;

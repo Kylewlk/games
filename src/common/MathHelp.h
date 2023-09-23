@@ -16,6 +16,10 @@
 
 namespace math
 {
+    constexpr float pi = 3.1415926f;
+    constexpr float pi_2 = pi * 2.0f;
+    constexpr float pi_half = pi * 0.5f;
+
     using Mat4 = glm::mat4x4;
     using Mat3 = glm::mat3x3;
     using Mat2 = glm::mat2x2;

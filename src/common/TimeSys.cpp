@@ -13,6 +13,7 @@ TimeSys TimeSys::timeSys;
 TimeSys::TimeSys()
 {
     this->startTime = high_resolution_clock::now();
+    this->now = high_resolution_clock::now();
 }
 
 void TimeSys::update()
