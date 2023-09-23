@@ -51,8 +51,22 @@ ByteBuffer readFile(const std::string& filePath);
 void writeToFile(const std::string& filePath, const std::string& str);
 void writeToFile(const std::string& filePath, const ByteBuffer& data);
 
+enum class LineType
+{
+    lines,
+    strip,
+    loop
+};
+
 void drawQuad();
 void drawPoints(math::Vec3* points, int count, const math::Mat4& mat, const math::Vec4& color, float pointSize);
+void drawPoints(math::Vec2* points, int count, const math::Mat4& mat, const math::Vec4& color, float pointSize);
+void drawLines(math::Vec3* points, int count, LineType type, const math::Mat4& mat, const math::Vec4& color, float width);
+void drawLines(math::Vec2* points, int count, LineType type, const math::Mat4& mat, const math::Vec4& color, float width);
+void drawAxis2D(const math::Mat4& mat, float size, float width);
+void drawAxis3D(const math::Mat4& mat, float size, float width);
+void drawString(math::Vec2 pos, const math::Vec4& color, std::string_view str);
+void drawIndicator(math::Vec2* pos, int count, const math::Vec4& color);
 
 namespace json
 {

@@ -5,6 +5,7 @@
 #include "common/EventSystem.h"
 #include "common/Shader.h"
 #include "camera/Camera2D.h"
+#include "common/Utils.h"
 
 namespace Game101_HW4
 {
@@ -100,6 +101,13 @@ void GeometryScene::draw()
     }
 
     glBindVertexArray(0);
+
+    if (this->drawIndicator)
+    {
+        static std::vector<math::Vec2> screenPs;
+        this->camera->worldToScreen(this->points, 4, screenPs);
+        ::drawIndicator(screenPs.data(), 4, {0.3, 0.5, 1, 1});
+    }
 }
 
 void GeometryScene::onMouseEvent(const MouseEvent* e)
@@ -152,6 +160,8 @@ void GeometryScene::drawSettings()
     ImGui::Separator();
     needUpdate = ImGui::RadioButton("Native", &this->drawType, 0) || needUpdate;
     needUpdate =  ImGui::RadioButton("de Casteljau", &this->drawType, 1) || needUpdate;
+
+    ImGui::Checkbox("Indicator", &this->drawIndicator);
 
     if (needUpdate)
     {

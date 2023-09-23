@@ -36,6 +36,7 @@ private:
 
 
     int drawType{0};
+    bool drawIndicator{true};
 
     math::Vec2 points[4]{};
     float step{ 0.01f};

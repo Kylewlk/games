@@ -94,6 +94,25 @@ math::Vec2 Camera::worldToScreen(const math::Vec3& point) const
     return {x, y};
 }
 
+void Camera::worldToScreen(math::Vec3* points, size_t count, std::vector<math::Vec2>& out) const
+{
+    out.clear();
+    out.reserve(count);
+    for (int i = 0; i < count; ++i)
+    {
+        out.push_back(worldToScreen(points[i]));
+    }
+}
+
+void Camera::worldToScreen(math::Vec2* points, size_t count, std::vector<math::Vec2>& out) const
+{
+    out.clear();
+    out.reserve(count);
+    for (int i = 0; i < count; ++i)
+    {
+        out.push_back(worldToScreen({points[i], 0}));
+    }
+}
 
 void Camera::move(const math::Vec3& step)
 {

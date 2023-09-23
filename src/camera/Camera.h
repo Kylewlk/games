@@ -38,6 +38,8 @@ public:
 
     [[nodiscard]] math::Vec2 screenToWorld(const math::Vec2& point) const;
     [[nodiscard]] math::Vec2 worldToScreen(const math::Vec3& point) const;
+    void worldToScreen(math::Vec3* points, size_t count, std::vector<math::Vec2>& out) const;
+    void worldToScreen(math::Vec2* points, size_t count, std::vector<math::Vec2>& out) const;
 
     float updateSpeed{1.0f};
 
