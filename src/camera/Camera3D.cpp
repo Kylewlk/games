@@ -111,7 +111,7 @@ void Camera3D::forward(float distance)
     auto newPos = this->position + (dir * distance * this->updateSpeed);
     auto newDir = this->target - newPos;
 
-    if (glm::dot(newDir, dir) > 0.01)
+    if (glm::dot(newDir, dir) > 0.0001)
     {
         this->position += (dir * distance * this->updateSpeed);
         this->isNeedUpdate = true;

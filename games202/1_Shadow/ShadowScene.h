@@ -6,20 +6,20 @@
 #include "camera/Camera3D.h"
 #include "BaseScene.h"
 
-class Model3DScene : public BaseScene
+class ShadowScene : public BaseScene
 {
 public:
-    static constexpr const char* ID = "Model 3D";
+    static constexpr const char* ID = "Shadow";
 
     static SceneRef create();
 
-    ~Model3DScene() override;
-    Model3DScene(const Model3DScene&) = delete;
-    Model3DScene& operator=(const Model3DScene&) = delete;
+    ~ShadowScene() override;
+    ShadowScene(const ShadowScene&) = delete;
+    ShadowScene& operator=(const ShadowScene&) = delete;
 
 
 private:
-    Model3DScene();
+    ShadowScene();
     bool init();
 
     void draw() override;
@@ -27,8 +27,8 @@ private:
     void drawSettings() override;
 
     ModelRef model;
+    ModelRef modelPlane;
     TextureRef texture;
-    ShaderRef shaderUnlit;
     ShaderRef shaderLight;
 
     int showType = 1;

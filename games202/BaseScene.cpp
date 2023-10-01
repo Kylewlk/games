@@ -100,7 +100,7 @@ void BaseScene::onMouseEvent(const MouseEvent* e)
 
     if (e->mouseEventType == MouseEvent::kMouseScroll)
     {
-        this->camera->forward((float)e->scrollY*20.0f);
+        this->camera->forward((float)e->scrollY*2.0f);
     }
     else if (e->mouseEventType == MouseEvent::kMouseMove)
     {
@@ -111,6 +111,7 @@ void BaseScene::onMouseEvent(const MouseEvent* e)
         }
         else if(this->holdMidButton)
         {
+            delta *= 0.02f;
             this->camera->move({delta.x, -delta.y, 0});
         }
     }
