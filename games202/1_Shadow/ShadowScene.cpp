@@ -67,6 +67,9 @@ void ShadowScene::reset()
     this->halfLambert = false;
 
     this->shadowType = 3;
+    this->depthBias = 0.1f;
+    this->sampleDistribution = 0;
+    this->samplerFilterSize = 15;
 }
 
 void ShadowScene::genShadowMap()
@@ -217,7 +220,7 @@ void ShadowScene::draw()
         timer = std::fmod(timer, math::pi_2);
         lightPosition.x = std::sin(timer*6.0f) * 1.5f;
         lightPosition.y = std::sin(timer*4.0f) * 1.0f + 5.0f;
-        lightPosition.z = std::sin(timer*2.0f) * 1.5f + 3.f;
+        lightPosition.z = std::sin(timer*2.0f) * 1.0f + 4.f;
     }
 
     if (showType == 1)

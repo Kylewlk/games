@@ -59,8 +59,8 @@ private:
 
     float maxLightDistance = 200.f;
     float depthBias = 0.1f;
-    int sampleDistribution = 0;
-    int samplerFilterSize = 5;
+    int sampleDistribution = 0; // 0-poisson（松泊分布采样）, 1-uniform（随机均匀采样）, 2-all（采样所有像素）
+    int samplerFilterSize = 15;
 
     math::Vec3 lightPosition{0.0f, 5.0f, 3.0f};
     math::Vec3 lightColor{1.0, 1.0, 1.0};

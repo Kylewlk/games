@@ -52,6 +52,11 @@ float unpack(vec4 rgbaDepth) {
     return dot(rgbaDepth, bitShift);
 }
 
+float getDistance(vec2 uv)
+{
+    return unpack(texture(uShadowMap, uv)) * uMaxLightDistance;
+}
+
 vec2 poissonDisk[NUM_SAMPLES];
 
 void poissonDiskSamples( const in vec2 randomSeed ) {
@@ -109,12 +114,12 @@ float PCF(vec2 shadowCoord, int penumbraSize)
       uniformDiskSamples(shadowCoord);
     }
 
-    float lightDis = unpack(texture(uShadowMap, shadowCoord)) * uMaxLightDistance;
+    float lightDis = getDistance(shadowCoord);
     occ += step(0, (lightDis - dis + bias));
 
     for( int i = 0; i < NUM_SAMPLES; i ++ ) {
       vec2 uv = shadowCoord + (poissonDisk[i] * uShadowMapInvSize * float(penumbraSize));
-      lightDis = unpack(texture(uShadowMap, uv)) * uMaxLightDistance;
+      lightDis = getDistance(uv);
       occ += step(0, (lightDis - dis + bias));
     }
     occ = occ / (float(NUM_SAMPLES) + 1.0);
@@ -126,7 +131,7 @@ float PCF(vec2 shadowCoord, int penumbraSize)
         for(int y = -penumbraSize; y <= penumbraSize; ++y)
         {
           vec2 uv = shadowCoord + vec2(x, y) * uShadowMapInvSize;
-          float lightDis = unpack(texture(uShadowMap, uv)) * uMaxLightDistance;
+          float lightDis = getDistance(uv);
           occ += step(0.0, (lightDis - dis + bias));        
         }    
     }
@@ -140,14 +145,13 @@ float PCF(vec2 shadowCoord, int penumbraSize)
 float findBlocker(vec2 shadowCoord)
 {
   float blocker = 0.0f;
-  const int blockerSize = 5;
+  const int blockerSize = 10;
   for(int x = -blockerSize; x <= blockerSize; ++x)
   {
       for(int y = -blockerSize; y <= blockerSize; ++y)
       {
         vec2 uv = shadowCoord + vec2(x, y) * uShadowMapInvSize;
-        blocker += unpack(texture(uShadowMap, uv));
-             
+        blocker += getDistance(uv);
       }    
   }
   float col = float(blockerSize * 2 + 1);
@@ -161,8 +165,7 @@ float PCSS(vec2 shadowCoord)
 
   // STEP 1: avgblocker depth
   float blockDepth = findBlocker(shadowCoord);
-  blockDepth *= uMaxLightDistance;
-  
+
   // STEP 2: penumbra size
   float ligthDis = distance(vWorldPos, uLightPos);
 
@@ -179,7 +182,7 @@ float PCSS(vec2 shadowCoord)
 float useShadowMap(vec2 shadowCoord)
 {
   float dis = distance(vWorldPos, uLightPos);
-  float lightDis = unpack(texture(uShadowMap, shadowCoord)) * uMaxLightDistance;
+  float lightDis = getDistance(shadowCoord);
 
   vec3 lightDir = normalize(uLightPos - vWorldPos);
   vec3 normal = normalize(vNormal);
@@ -231,7 +234,7 @@ void main(void)
   vec2 shadowCoord = (vPositionInLight.xy/vPositionInLight.w) * 0.5 + 0.5;
 
   float visibility = 1.0;
-  if(shadowCoord.x >=0 && shadowCoord.x < 1.0 && shadowCoord.y >= 0 && shadowCoord.y <=1.0)
+  if(shadowCoord.x >=0 && shadowCoord.x < 1.0 && shadowCoord.y >= 0 && shadowCoord.y <1.0)
   {
     if (uShadowType == 1)
     {
