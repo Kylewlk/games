@@ -21,17 +21,32 @@ public:
 private:
     ShadowScene();
     bool init();
+    void onMouseEvent(const MouseEvent* e) override;
 
     void draw() override;
     void reset() override;
     void drawSettings() override;
 
+    void drawScene();
+    void drawShadowMap();
+    void drawLightView();
+
+    Camera3DRef cameraLight;
+    Camera2DRef camera2d;
+
     ModelRef model;
     ModelRef modelPlane;
     TextureRef texture;
     ShaderRef shaderLight;
+    ShaderRef shader2d;
+    math::Mat4 modelMat;
+    math::Mat4 planeMat;
 
-    int showType = 1;
+    constexpr static int shadowMapResolution = 2048;
+    FrameBufferRef shadowMap;
+
+
+    int showType = 1; // 1-Scene，2-Light View，3-Depth Distance, 4-Depth Z
     math::Vec3 color{0.6f, 0.6f, 0.6f};
     math::Vec3 diffuse{0.8f, 0.8f, 0.8f};
     math::Vec3 specular{0.1f, 0.1f, 0.1f};

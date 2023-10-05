@@ -106,6 +106,7 @@ void Model3DScene::draw()
 
         this->model->draw();
 
+        drawAxis3D(camera->getViewProj() * mat, 1, 2);
         drawPoints(&lightPosition, 1, camera->getViewProj(), {lightColor, 1.0}, 5);
     }
 }
