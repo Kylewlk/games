@@ -38,6 +38,8 @@ bool ShadowScene::init()
     this->texture = Texture::create("asset/model/mary/MC003_Kozakura_Mari.png", true, false);
     this->modelPlane = Model::create("asset/model/plane.obj");
     this->shaderLight = Shader::createByPath("asset/shader/model.vert", "asset/shader/modelPointLight.frag");
+    this->shaderShadowMap = Shader::createByPath("games202/1_Shadow/shadow_map.vert", "games202/1_Shadow/shadow_map.frag");
+    this->shaderShowShaderMap = Shader::createByPath("asset/shader/picture.vert", "games202/1_Shadow/show_shadow_map.frag");
     this->shader2d = Shader::createByPath("asset/shader/picture.vert", "asset/shader/picture.frag");
 
     this->shadowMap = FrameBuffer::create(shadowMapResolution, shadowMapResolution, RenderTarget::kTexColor, RenderTarget::kTexDepth);
@@ -62,6 +64,37 @@ void ShadowScene::reset()
     this->lightMove = true;
     this->useTexture = true;
     this->halfLambert = false;
+
+    this->useDistance = true;
+}
+
+void ShadowScene::genShadowMap()
+{
+    shadowMap->bind();
+    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    shaderShadowMap->use();
+    shaderShadowMap->setUniform("viewProj", cameraLight->getViewProj());
+
+    if (useDistance)
+    {
+        shaderShadowMap->setUniform("uUseDistance", true);
+        shaderShadowMap->setUniform("uLightPos", lightPosition);
+        shaderShadowMap->setUniform("uMaxDistance", 200.0f);
+    }
+    else
+    {
+        shaderShadowMap->setUniform("uUseDistance", false);
+    }
+
+    shaderShadowMap->setUniform("model", modelMat);
+    this->model->draw();
+
+    shaderShadowMap->setUniform("model", planeMat);
+    this->modelPlane->draw();
+
+    shadowMap->unbind();
 }
 
 void ShadowScene::drawScene()
@@ -93,19 +126,6 @@ void ShadowScene::drawScene()
 
     drawAxis3D(camera->getViewProj(), 1, 2);
     drawPoints(&lightPosition, 1, camera->getViewProj(), {lightColor, 1.0}, 5);
-}
-
-void ShadowScene::drawShadowMap()
-{
-    auto size = shadowMapResolution * 0.5f;
-    // Y 轴乘以 -1 是为了让 纹理坐标的原点在左上角，Y 轴向下
-    auto mat = camera2d->getViewProj() * math::scale({size, size * -1.f, 1.0f});
-
-    shader2d->use();
-    shader2d->setUniform("mvp", mat);
-    shader2d->setUniform("color", math::Vec4{1, 1, 1, 1});
-    shader2d->bindTexture(3, this->shadowMap->getColor());
-    drawQuad();
 }
 
 void ShadowScene::drawLightView()
@@ -141,7 +161,28 @@ void ShadowScene::drawLightView()
 
     shadowMap->unbind();
 
-    drawShadowMap();
+    auto size = shadowMapResolution * 0.5f;
+    // Y 轴乘以 -1 是为了让 纹理坐标的原点在左上角，Y 轴向下
+    auto mat = camera2d->getViewProj() * math::scale({size, size * -1.f, 1.0f});
+    shader2d->use();
+    shader2d->setUniform("mvp", mat);
+    shader2d->setUniform("color", math::Vec4{1, 1, 1, 1});
+    shader2d->bindTexture(3, this->shadowMap->getColor());
+    drawQuad();
+}
+
+void ShadowScene::drawShadowMap()
+{
+    genShadowMap();
+
+    auto size = shadowMapResolution * 0.5f;
+    // Y 轴乘以 -1 是为了让 纹理坐标的原点在左上角，Y 轴向下
+    auto mat = camera2d->getViewProj() * math::scale({size, size * -1.f, 1.0f});
+
+    shaderShowShaderMap->use();
+    shaderShowShaderMap->setUniform("mvp", mat);
+    shaderShowShaderMap->bindTexture("tex", this->shadowMap->getColor());
+    drawQuad();
 }
 
 void ShadowScene::draw()
@@ -176,12 +217,17 @@ void ShadowScene::draw()
     {
         drawLightView();
     }
+    else
+    {
+        drawShadowMap();
+    }
 }
 
 void ShadowScene::drawSettings()
 {
     ImGui::RadioButton("Scene", &showType, 1);
     ImGui::RadioButton("Light View", &showType, 2);
+    ImGui::RadioButton("Depth", &showType, 3);
     ImGui::Separator();
 
     ImGui::Checkbox("Use Texture", &useTexture);
@@ -195,6 +241,8 @@ void ShadowScene::drawSettings()
     ImGui::SliderFloat("Light Intensity", (float*)&lightIntensity, 0.1f, 4.0f);
     ImGui::Checkbox("Half Lambert", &halfLambert);
 
+
+    ImGui::Checkbox("Use Distance", &useDistance);
 }
 
 void ShadowScene::onMouseEvent(const MouseEvent* e)

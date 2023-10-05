@@ -27,9 +27,10 @@ private:
     void reset() override;
     void drawSettings() override;
 
+    void genShadowMap();
     void drawScene();
-    void drawShadowMap();
     void drawLightView();
+    void drawShadowMap();
 
     Camera3DRef cameraLight;
     Camera2DRef camera2d;
@@ -38,15 +39,18 @@ private:
     ModelRef modelPlane;
     TextureRef texture;
     ShaderRef shaderLight;
+    ShaderRef shaderShadowMap;
+    ShaderRef shaderShowShaderMap;
     ShaderRef shader2d;
-    math::Mat4 modelMat;
-    math::Mat4 planeMat;
+
+    math::Mat4 modelMat{};
+    math::Mat4 planeMat{};
 
     constexpr static int shadowMapResolution = 2048;
     FrameBufferRef shadowMap;
 
 
-    int showType = 1; // 1-Scene，2-Light View，3-Depth Distance, 4-Depth Z
+    int showType = 1; // 1-Scene，2-Light View，3-Depth
     math::Vec3 color{0.6f, 0.6f, 0.6f};
     math::Vec3 diffuse{0.8f, 0.8f, 0.8f};
     math::Vec3 specular{0.1f, 0.1f, 0.1f};
@@ -57,4 +61,6 @@ private:
     bool lightMove{true};
     bool useTexture{true};
     bool halfLambert{false};
+
+    bool useDistance{true};
 };
