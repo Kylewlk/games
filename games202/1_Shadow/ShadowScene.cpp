@@ -44,6 +44,7 @@ bool ShadowScene::init()
     this->shaderShadow = Shader::createByPath("games202/1_Shadow/shadow.vert", "games202/1_Shadow/shadow.frag");
 
     this->shadowMap = FrameBuffer::create(shadowMapResolution, shadowMapResolution, RenderTarget::kTexColor, RenderTarget::kTexDepth);
+    this->shadowMap->getColor()->setSampler(GL_NEAREST, GL_CLAMP_TO_EDGE);
 
     return true;
 }

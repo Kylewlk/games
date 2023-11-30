@@ -146,16 +146,17 @@ float findBlocker(vec2 shadowCoord)
 {
   float blocker = 0.0f;
   const int blockerSize = 10;
+  float blockerCount = 0.00000001;
   for(int x = -blockerSize; x <= blockerSize; ++x)
   {
       for(int y = -blockerSize; y <= blockerSize; ++y)
       {
         vec2 uv = shadowCoord + vec2(x, y) * uShadowMapInvSize;
         blocker += getDistance(uv);
+        blockerCount += 1.0;
       }    
   }
-  float col = float(blockerSize * 2 + 1);
-  blocker /= col * col;
+  blocker /= blockerCount;
 
 	return blocker;
 }
@@ -169,7 +170,7 @@ float PCSS(vec2 shadowCoord)
   // STEP 2: penumbra size
   float ligthDis = distance(vWorldPos, uLightPos);
 
-  float size = uSamplerFilterSize * (ligthDis - blockDepth) / blockDepth; 
+  float size = uSamplerFilterSize * (ligthDis - blockDepth) / blockDepth;
   int penumbraSize = max(0, min(1000, int(size)));
 
   // STEP 3: filtering
